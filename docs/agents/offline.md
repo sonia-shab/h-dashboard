@@ -94,7 +94,7 @@ Two different questions hide behind "does it work offline":
 | Zabbix API | `config/services.php:38` → `ZABBIX_URL` | no — internal network |
 | Sentry | `config/sentry.php`, `SENTRY_LARAVEL_DSN` | only when a DSN is set (empty by default) |
 | Mail | `MAIL_*` | only when mail sending is enabled |
-| OSRM / Nominatim | `config/map.php:22-40` | no — `127.0.0.1` |
+| OSRM / Nominatim | `config/map.php:12-30` | no — `127.0.0.1` |
 
 **Build / install only:** `composer install`, `npm install`, `docker pull` (postgis,
 redis), `npx playwright install`. `npm run build` and `php artisan` run offline; the
@@ -114,8 +114,10 @@ grep -rnE "tile_url_template|tile_url|tile_server" config resources app routes t
 
 # 4) retired tile keys stay retired (#1508 removed tile_server_ip/port/scheme and tile_url)
 #    NOTE: match `map.tile_url` with a word boundary — underscores are word characters,
-#    so \b excludes the live `map.tile_url_template` (tile_url is its prefix):
-grep -rnE "TILE_SERVER_|map[.]tile_url\b" config resources app routes tests .env*   # expected: empty
+#    so \b excludes the live `map.tile_url_template` (tile_url is its prefix).
+#    A gitignored local .env may still carry a retired TILE_SERVER_* line — harmless,
+#    it has no consumer; the committed templates must stay empty:
+grep -rnE "TILE_SERVER_|map[.]tile_url\b" config resources app routes tests .env* .env-*   # expected: empty
 
 # 5) network defaults inside vendored libraries
 grep -o -E "router[.]project-osrm[.]org|api[.]mapbox[.]com" public/js/leaflet/leaflet-routing-machine.min.js | sort -u
